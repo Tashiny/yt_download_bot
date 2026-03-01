@@ -10,6 +10,7 @@ import os
 from pathlib import Path
 
 from aiogram import F, Router
+from aiogram.exceptions import TelegramEntityTooLarge
 from aiogram.types import (
     BufferedInputFile,
     CallbackQuery,
@@ -259,15 +260,40 @@ async def cb_download(callback: CallbackQuery, subscription=None, **kwargs) -> N
         )
 
         video_file = FSInputFile(file_path, filename=f"{title[:50]}.mp4")
-        await callback.message.answer_document(
-            document=video_file,
-            caption=(
-                f"🎬 <b>{title[:100]}</b>\n"
-                f"📊 Качество: {height_str}p\n"
-                f"📦 Размер: {file_size / (1024**2):.1f} МБ"
-            ),
-            parse_mode="HTML",
+        caption_text = (
+            f"🎬 <b>{title[:100]}</b>\n"
+            f"📊 Качество: {height_str}p\n"
+            f"📦 Размер: {file_size / (1024**2):.1f} МБ"
         )
+
+        try:
+            # Try sending as video first (better preview in chat)
+            await callback.message.answer_video(
+                video=video_file,
+                caption=caption_text,
+                parse_mode="HTML",
+            )
+        except TelegramEntityTooLarge:
+            # File too large for Telegram upload → offer web download
+            web_url = _build_web_url(
+                callback.from_user.id, url, format_id, platform
+            )
+            await callback.message.edit_text(
+                "⚠️ <b>Файл слишком большой для Telegram</b>\n\n"
+                f"📦 Размер: {file_size / (1024**2):.1f} МБ\n"
+                "Скачайте через веб-интерфейс:",
+                reply_markup=web_download_kb(web_url),
+                parse_mode="HTML",
+            )
+            return
+        except Exception:
+            # Fallback: try as document
+            video_file = FSInputFile(file_path, filename=f"{title[:50]}.mp4")
+            await callback.message.answer_document(
+                document=video_file,
+                caption=caption_text,
+                parse_mode="HTML",
+            )
 
         # Update download counter
         await increment_download_count(callback.from_user.id)
