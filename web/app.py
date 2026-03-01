@@ -40,6 +40,12 @@ serializer = URLSafeTimedSerializer(settings.secret_key)
 _web_downloads: dict[str, Path] = {}
 
 
+@app.get("/health")
+async def health():
+    """Healthcheck endpoint for Railway/Docker."""
+    return {"status": "ok"}
+
+
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})

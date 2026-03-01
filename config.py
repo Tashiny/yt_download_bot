@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import json
 import os
 import sys
 from pathlib import Path
-from typing import List
+from typing import List, Union
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings
 from dotenv import load_dotenv
 
@@ -16,8 +18,8 @@ BASE_DIR = Path(__file__).resolve().parent
 # FFmpeg binaries should be placed in <project_root>/ffmpeg/
 # Expected structure:
 #   ffmpeg/
-#     ffmpeg.exe
-#     ffprobe.exe
+#     ffmpeg      (or ffmpeg.exe on Windows)
+#     ffprobe     (or ffprobe.exe on Windows)
 FFMPEG_DIR = BASE_DIR / "ffmpeg"
 if FFMPEG_DIR.exists():
     # Prepend to PATH so yt-dlp and any subprocess finds it first
@@ -62,6 +64,28 @@ class Settings(BaseSettings):
 
     # Security
     secret_key: str = "change-me-in-production"
+
+    @field_validator("admin_ids", mode="before")
+    @classmethod
+    def parse_admin_ids(cls, v: Union[str, list, int]) -> list:
+        """Accept comma-separated string, JSON list, single int, or list."""
+        if isinstance(v, list):
+            return v
+        if isinstance(v, int):
+            return [v]
+        if isinstance(v, str):
+            v = v.strip()
+            if not v:
+                return []
+            # Try JSON first: "[1,2,3]"
+            if v.startswith("["):
+                try:
+                    return json.loads(v)
+                except (json.JSONDecodeError, ValueError):
+                    pass
+            # Comma-separated: "123,456" or single: "123"
+            return [int(x.strip()) for x in v.split(",") if x.strip()]
+        return []
 
     class Config:
         env_file = ".env"
