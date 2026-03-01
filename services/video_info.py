@@ -66,22 +66,22 @@ class VideoInfo:
 def detect_platform(url: str) -> Optional[str]:
     """Detect platform from URL."""
     url_lower = url.lower()
-    if any(x in url_lower for x in ["youtube.com", "youtu.be", "youtube.com/shorts"]):
+    if any(x in url_lower for x in ["youtube.com", "youtu.be"]):
         return "youtube"
-    if any(x in url_lower for x in ["tiktok.com", "vm.tiktok.com"]):
+    if any(x in url_lower for x in ["tiktok.com", "vm.tiktok.com", "vt.tiktok.com"]):
         return "tiktok"
     return None
 
 
 def is_valid_url(text: str) -> bool:
     """Check if text contains a valid YouTube or TikTok URL."""
-    pattern = r'(https?://)?(www\.)?(youtube\.com|youtu\.be|tiktok\.com|vm\.tiktok\.com)/\S+'
+    pattern = r'(https?://)?(www\.)?(youtube\.com|youtu\.be|([a-z]{2,3}\.)?tiktok\.com)/\S+'
     return bool(re.search(pattern, text))
 
 
 def extract_url(text: str) -> Optional[str]:
     """Extract first valid URL from text."""
-    pattern = r'(https?://(?:www\.)?(?:youtube\.com|youtu\.be|tiktok\.com|vm\.tiktok\.com)/\S+)'
+    pattern = r'(https?://(?:www\.)?(?:youtube\.com|youtu\.be|(?:[a-z]{2,3}\.)?tiktok\.com)/\S+)'
     match = re.search(pattern, text)
     return match.group(1) if match else None
 
