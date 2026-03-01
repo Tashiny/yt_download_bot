@@ -67,6 +67,9 @@ class Settings(BaseSettings):
     # Security
     secret_key: str = "change-me-in-production"
 
+    # Cookies file for YouTube (to bypass bot detection)
+    cookies_file: str = str(BASE_DIR / "cookies.txt")
+
     @field_validator("admin_ids", mode="before")
     @classmethod
     def parse_admin_ids(cls, v: Union[str, list, int]) -> list:
