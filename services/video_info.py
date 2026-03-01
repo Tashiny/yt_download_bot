@@ -106,12 +106,6 @@ def _extract_info_sync(url: str) -> VideoInfo:
         "no_warnings": True,
         "extract_flat": False,
         "no_color": True,
-        # Use alternative YouTube clients to bypass bot detection
-        "extractor_args": {
-            "youtube": {
-                "player_client": ["mweb", "android", "ios"],
-            }
-        },
     }
 
     # Only set ffmpeg_location if it's an actual existing path
@@ -122,8 +116,28 @@ def _extract_info_sync(url: str) -> VideoInfo:
     if Path(settings.cookies_file).exists():
         ydl_opts["cookiefile"] = settings.cookies_file
 
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        info = ydl.extract_info(url, download=False)
+    # Try default client first (full quality), fall back to mobile clients
+    info = None
+    for attempt, client_config in enumerate([
+        None,  # attempt 0: default (auto)
+        {"youtube": {"player_client": ["android_creator", "android", "ios"]}},  # attempt 1
+        {"youtube": {"player_client": ["mweb"]}},  # attempt 2: last resort
+    ]):
+        try:
+            opts = dict(ydl_opts)
+            if client_config:
+                opts["extractor_args"] = client_config
+            with yt_dlp.YoutubeDL(opts) as ydl:
+                info = ydl.extract_info(url, download=False)
+            if info:
+                break
+        except Exception as e:
+            err_msg = str(e).lower()
+            # Only retry on bot/sign-in errors — other errors should raise immediately
+            if "sign in" in err_msg or "bot" in err_msg or "confirm" in err_msg:
+                if attempt < 2:
+                    continue
+            raise
 
     if not info:
         raise ValueError("Не удалось получить информацию о видео")
@@ -142,12 +156,23 @@ def _extract_info_sync(url: str) -> VideoInfo:
         if not height or height < 144:
             continue
 
+        width = fmt.get("width") or 0
         vcodec = fmt.get("vcodec", "none")
         acodec = fmt.get("acodec", "none")
 
         # Skip audio-only
         if vcodec == "none":
             continue
+
+        # Skip formats with wrong aspect ratio (e.g. 4:3 when should be 16:9)
+        # A widescreen video should have width/height >= 1.5 (approx 16:10)
+        # If width is reported as narrower than height, skip it
+        if width and height:
+            aspect = width / height
+            # Skip clearly broken 4:3 or portrait formats for landscape videos
+            # We allow ~1.0 (square) and above to be safe with various content
+            if aspect < 1.0 and width > 0:
+                continue
 
         file_size = fmt.get("filesize") or fmt.get("filesize_approx")
 
@@ -166,7 +191,7 @@ def _extract_info_sync(url: str) -> VideoInfo:
             acodec=acodec,
         )
 
-        # Keep best format per resolution (prefer with audio, then largest size)
+        # Keep best format per resolution (prefer with audio, then widest, then largest)
         existing = formats_map.get(height)
         if existing is None:
             formats_map[height] = fmt_obj

@@ -50,12 +50,6 @@ def _download_sync(
         "no_warnings": True,
         "merge_output_format": "mp4",
         "postprocessors": [],
-        # Use alternative YouTube clients to bypass bot detection
-        "extractor_args": {
-            "youtube": {
-                "player_client": ["mweb", "android", "ios"],
-            }
-        },
     }
 
     # Only set ffmpeg_location if it's an actual path (not just "ffmpeg")
@@ -70,12 +64,10 @@ def _download_sync(
     if platform == "tiktok":
         # TikTok: download best quality without watermark
         ydl_opts["format"] = "best"
-        # yt-dlp by default fetches TikTok videos without watermark
     else:
         # YouTube: use format_id or merge best video+audio
         if format_id and format_id != "best":
-            # Download specific video format + best audio, merge into mp4
-            ydl_opts["format"] = f"{format_id}+bestaudio[ext=m4a]/best"
+            ydl_opts["format"] = f"{format_id}+bestaudio[ext=m4a]/{format_id}+bestaudio/best"
         else:
             ydl_opts["format"] = "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best"
 
@@ -98,8 +90,26 @@ def _download_sync(
 
     ydl_opts["progress_hooks"] = [progress_hook]
 
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        ydl.download([url])
+    # Try default client first, fall back to mobile clients on sign-in error
+    for attempt, client_config in enumerate([
+        None,  # attempt 0: default
+        {"youtube": {"player_client": ["android_creator", "android", "ios"]}},  # attempt 1
+        {"youtube": {"player_client": ["mweb"]}},  # attempt 2: last resort
+    ]):
+        try:
+            opts = dict(ydl_opts)
+            if client_config:
+                opts["extractor_args"] = client_config
+            with yt_dlp.YoutubeDL(opts) as ydl:
+                ydl.download([url])
+            break
+        except Exception as e:
+            err_msg = str(e).lower()
+            if "sign in" in err_msg or "bot" in err_msg or "confirm" in err_msg:
+                if attempt < 2:
+                    collector.filenames.clear()
+                    continue
+            raise
 
     # Find the downloaded file
     if collector.filenames:
