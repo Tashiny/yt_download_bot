@@ -1,0 +1,396 @@
+/* ═══════════════════════════════════════════════
+   Video Downloader — Modern Dark Theme
+   ═══════════════════════════════════════════════ */
+
+:root {
+    --bg-primary: #0a0a0f;
+    --bg-secondary: #12121a;
+    --bg-card: #1a1a2e;
+    --bg-card-hover: #1e1e35;
+    --text-primary: #e8e8f0;
+    --text-secondary: #8888a0;
+    --accent: #6c5ce7;
+    --accent-hover: #7c6df7;
+    --accent-glow: rgba(108, 92, 231, 0.3);
+    --success: #00b894;
+    --danger: #ff6b6b;
+    --border: rgba(255, 255, 255, 0.06);
+    --gradient-1: linear-gradient(135deg, #6c5ce7 0%, #a855f7 100%);
+    --gradient-2: linear-gradient(135deg, #0a0a1a 0%, #1a1a3e 100%);
+    --radius: 16px;
+    --radius-sm: 10px;
+    --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    --shadow-glow: 0 0 40px rgba(108, 92, 231, 0.15);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background-image:
+        radial-gradient(ellipse at 20% 50%, rgba(108, 92, 231, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, rgba(168, 85, 247, 0.06) 0%, transparent 50%);
+}
+
+.container {
+    width: 100%;
+    max-width: 520px;
+}
+
+/* ═══════ Cards ═══════ */
+
+.card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 32px;
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(10px);
+}
+
+.download-card {
+    text-align: center;
+}
+
+.error-card {
+    text-align: center;
+    padding: 48px 32px;
+}
+
+/* ═══════ Hero (Index) ═══════ */
+
+.hero {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.logo {
+    font-size: 64px;
+    margin-bottom: 16px;
+    filter: drop-shadow(0 0 20px rgba(108, 92, 231, 0.4));
+}
+
+.hero h1 {
+    font-size: 32px;
+    font-weight: 700;
+    background: var(--gradient-1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 8px;
+}
+
+.subtitle {
+    color: var(--text-secondary);
+    font-size: 16px;
+}
+
+/* ═══════ Steps ═══════ */
+
+.steps {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin: 24px 0;
+    text-align: left;
+}
+
+.step {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 16px;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+}
+
+.step-number {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    background: var(--gradient-1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 16px;
+}
+
+.step p {
+    font-size: 15px;
+    color: var(--text-primary);
+}
+
+/* ═══════ Video Preview ═══════ */
+
+.video-preview {
+    position: relative;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.thumbnail {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: var(--radius-sm);
+}
+
+.video-info-overlay {
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+    right: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.duration-badge,
+.platform-badge {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    backdrop-filter: blur(8px);
+}
+
+.duration-badge {
+    background: rgba(0, 0, 0, 0.75);
+    color: white;
+}
+
+.platform-badge {
+    color: white;
+}
+
+.platform-badge.yt {
+    background: rgba(255, 0, 0, 0.85);
+}
+
+.platform-badge.tt {
+    background: rgba(0, 0, 0, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* ═══════ Video Details ═══════ */
+
+.video-details {
+    margin-bottom: 24px;
+}
+
+.video-title {
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.4;
+    margin-bottom: 8px;
+    text-align: left;
+}
+
+.video-uploader {
+    font-size: 14px;
+    color: var(--text-secondary);
+    text-align: left;
+    margin-bottom: 16px;
+}
+
+.format-info {
+    display: flex;
+    justify-content: center;
+}
+
+.format-badge {
+    display: inline-flex;
+    gap: 12px;
+    padding: 10px 20px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+}
+
+.quality {
+    font-weight: 700;
+    color: var(--accent);
+    font-size: 15px;
+}
+
+.size {
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+/* ═══════ Buttons ═══════ */
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.btn-primary {
+    background: var(--gradient-1);
+    color: white;
+    box-shadow: 0 4px 15px var(--accent-glow);
+}
+
+.btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 25px var(--accent-glow);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #00b894, #00d2a0);
+    color: white;
+    box-shadow: 0 4px 15px rgba(0, 184, 148, 0.3);
+}
+
+.btn-success:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 25px rgba(0, 184, 148, 0.4);
+}
+
+.btn-secondary {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+    background: var(--bg-card-hover);
+}
+
+.btn-lg {
+    padding: 16px 32px;
+    font-size: 17px;
+    width: 100%;
+    border-radius: 12px;
+}
+
+/* ═══════ Progress ═══════ */
+
+.progress-container {
+    margin-top: 20px;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: var(--bg-secondary);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 12px;
+}
+
+.progress-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--gradient-1);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.progress-text {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.ready-text {
+    font-size: 14px;
+    color: var(--success);
+    margin-top: 12px;
+}
+
+/* ═══════ Download Actions ═══════ */
+
+.download-actions {
+    margin-bottom: 20px;
+}
+
+/* ═══════ Error ═══════ */
+
+.error-icon {
+    font-size: 56px;
+    margin-bottom: 16px;
+}
+
+.error-card h1 {
+    font-size: 24px;
+    margin-bottom: 12px;
+}
+
+.error-card p {
+    color: var(--text-secondary);
+    margin-bottom: 24px;
+    line-height: 1.6;
+}
+
+.error-text {
+    color: var(--danger);
+    font-size: 14px;
+    margin-bottom: 16px;
+}
+
+/* ═══════ Misc ═══════ */
+
+.powered-by {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 20px;
+}
+
+.powered-by strong {
+    color: var(--accent);
+}
+
+/* ═══════ Responsive ═══════ */
+
+@media (max-width: 480px) {
+    body {
+        padding: 12px;
+    }
+
+    .card {
+        padding: 20px;
+    }
+
+    .hero h1 {
+        font-size: 26px;
+    }
+
+    .video-title {
+        font-size: 16px;
+    }
+
+    .btn-lg {
+        padding: 14px 24px;
+        font-size: 15px;
+    }
+}

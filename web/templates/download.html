@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Скачать видео — {{ video.title[:60] }}</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <div class="card download-card">
+            <!-- Video Preview -->
+            <div class="video-preview">
+                {% if video.thumbnail %}
+                <img src="{{ video.thumbnail }}" alt="{{ video.title }}" class="thumbnail">
+                {% endif %}
+                <div class="video-info-overlay">
+                    <span class="duration-badge">{{ video.duration_display }}</span>
+                    <span class="platform-badge {% if video.platform == 'youtube' %}yt{% else %}tt{% endif %}">
+                        {% if video.platform == 'youtube' %}YouTube{% else %}TikTok{% endif %}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Video Info -->
+            <div class="video-details">
+                <h1 class="video-title">{{ video.title }}</h1>
+                <p class="video-uploader">👤 {{ video.uploader }}</p>
+
+                {% if format %}
+                <div class="format-info">
+                    <div class="format-badge">
+                        <span class="quality">{{ format.quality_label }}</span>
+                        <span class="size">{{ format.size_display }}</span>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Download Button -->
+            <div class="download-actions">
+                <button id="downloadBtn" class="btn btn-primary btn-lg" onclick="startDownload()">
+                    <span id="btnIcon">📥</span>
+                    <span id="btnText">Скачать видео</span>
+                </button>
+
+                <div id="progressContainer" class="progress-container" style="display: none;">
+                    <div class="progress-bar">
+                        <div id="progressFill" class="progress-fill"></div>
+                    </div>
+                    <p id="progressText" class="progress-text">Подготовка к загрузке...</p>
+                </div>
+
+                <div id="downloadReady" style="display: none;">
+                    <a id="downloadLink" href="#" class="btn btn-success btn-lg" download>
+                        ✅ Скачать файл
+                    </a>
+                    <p class="ready-text">Файл готов к скачиванию!</p>
+                </div>
+
+                <div id="errorContainer" style="display: none;">
+                    <p class="error-text" id="errorText"></p>
+                    <button class="btn btn-secondary" onclick="startDownload()">
+                        🔄 Попробовать снова
+                    </button>
+                </div>
+            </div>
+
+            <p class="powered-by">
+                Powered by <strong>Video Downloader Bot</strong>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        const token = "{{ token }}";
+
+        async function startDownload() {
+            const btn = document.getElementById('downloadBtn');
+            const progress = document.getElementById('progressContainer');
+            const ready = document.getElementById('downloadReady');
+            const error = document.getElementById('errorContainer');
+
+            // Reset state
+            btn.style.display = 'none';
+            progress.style.display = 'block';
+            ready.style.display = 'none';
+            error.style.display = 'none';
+
+            // Animate progress
+            const fill = document.getElementById('progressFill');
+            const text = document.getElementById('progressText');
+            let pct = 0;
+            const interval = setInterval(() => {
+                if (pct < 85) {
+                    pct += Math.random() * 3;
+                    fill.style.width = Math.min(pct, 85) + '%';
+                }
+            }, 200);
+
+            text.textContent = 'Загрузка видео с сервера...';
+
+            try {
+                const response = await fetch(`/download/${token}/start`, {
+                    method: 'POST',
+                });
+
+                clearInterval(interval);
+
+                if (!response.ok) {
+                    throw new Error('Ошибка сервера');
+                }
+
+                const data = await response.json();
+
+                if (data.status === 'ready') {
+                    fill.style.width = '100%';
+                    text.textContent = 'Готово!';
+
+                    setTimeout(() => {
+                        progress.style.display = 'none';
+                        ready.style.display = 'block';
+                        document.getElementById('downloadLink').href = `/download/${token}/file`;
+                    }, 500);
+                }
+
+            } catch (e) {
+                clearInterval(interval);
+                progress.style.display = 'none';
+                error.style.display = 'block';
+                document.getElementById('errorText').textContent =
+                    'Произошла ошибка при загрузке. Попробуйте позже.';
+                btn.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>
