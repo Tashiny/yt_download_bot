@@ -51,7 +51,7 @@ async def index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 
-@app.get("/download/{token}", response_class=HTMLResponse)
+@app.get("/download/{token:path}", response_class=HTMLResponse)
 async def download_page(request: Request, token: str):
     """
     Show download page with video info.
@@ -102,7 +102,7 @@ async def download_page(request: Request, token: str):
     })
 
 
-@app.post("/download/{token}/start")
+@app.post("/download/{token:path}/start")
 async def start_download(token: str):
     """
     Start the actual download process.
@@ -130,7 +130,7 @@ async def start_download(token: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.get("/download/{token}/file")
+@app.get("/download/{token:path}/file")
 async def serve_file(token: str):
     """Serve the downloaded file."""
     try:

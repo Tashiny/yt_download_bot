@@ -56,7 +56,7 @@ class Settings(BaseSettings):
     plan_pro_downloads: int = -1     # unlimited
 
     # Downloads
-    max_telegram_file_size: int = 1_990_000_000  # ~1.99 GB
+    max_telegram_file_size: int = 49_000_000  # ~49 MB (Telegram Bot API upload limit is 50 MB)
     download_dir: str = str(BASE_DIR / "downloads")
     max_concurrent_downloads: int = 3
 
