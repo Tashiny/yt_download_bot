@@ -50,8 +50,12 @@ def _download_sync(
         "no_warnings": True,
         "merge_output_format": "mp4",
         "postprocessors": [],
-        "ffmpeg_location": str(Path(settings.ffmpeg_path).parent),
     }
+
+    # Only set ffmpeg_location if it's an actual path (not just "ffmpeg")
+    _ffmpeg_dir = str(Path(settings.ffmpeg_path).parent)
+    if Path(settings.ffmpeg_path).is_absolute() and Path(settings.ffmpeg_path).exists():
+        ydl_opts["ffmpeg_location"] = _ffmpeg_dir
 
     if platform == "tiktok":
         # TikTok: download best quality without watermark

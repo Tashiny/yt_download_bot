@@ -21,12 +21,14 @@ BASE_DIR = Path(__file__).resolve().parent
 #     ffmpeg      (or ffmpeg.exe on Windows)
 #     ffprobe     (or ffprobe.exe on Windows)
 FFMPEG_DIR = BASE_DIR / "ffmpeg"
-if FFMPEG_DIR.exists():
-    # Prepend to PATH so yt-dlp and any subprocess finds it first
+_ffmpeg_bin = FFMPEG_DIR / ("ffmpeg.exe" if sys.platform == "win32" else "ffmpeg")
+if _ffmpeg_bin.exists():
+    # Local ffmpeg found — prepend to PATH
     os.environ["PATH"] = str(FFMPEG_DIR) + os.pathsep + os.environ.get("PATH", "")
-    FFMPEG_PATH = str(FFMPEG_DIR / ("ffmpeg.exe" if sys.platform == "win32" else "ffmpeg"))
+    FFMPEG_PATH = str(_ffmpeg_bin)
     FFPROBE_PATH = str(FFMPEG_DIR / ("ffprobe.exe" if sys.platform == "win32" else "ffprobe"))
 else:
+    # Use system ffmpeg (apt-get install ffmpeg in Docker, or system PATH)
     FFMPEG_PATH = "ffmpeg"
     FFPROBE_PATH = "ffprobe"
 

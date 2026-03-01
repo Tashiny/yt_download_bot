@@ -15,7 +15,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Create necessary dirs
-RUN mkdir -p data downloads ffmpeg
+RUN mkdir -p data downloads
 
 # Railway provides PORT env var
 ENV WEB_HOST=0.0.0.0

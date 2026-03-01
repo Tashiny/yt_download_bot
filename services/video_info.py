@@ -106,8 +106,11 @@ def _extract_info_sync(url: str) -> VideoInfo:
         "no_warnings": True,
         "extract_flat": False,
         "no_color": True,
-        "ffmpeg_location": str(Path(settings.ffmpeg_path).parent),
     }
+
+    # Only set ffmpeg_location if it's an actual existing path
+    if Path(settings.ffmpeg_path).is_absolute() and Path(settings.ffmpeg_path).exists():
+        ydl_opts["ffmpeg_location"] = str(Path(settings.ffmpeg_path).parent)
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         info = ydl.extract_info(url, download=False)
